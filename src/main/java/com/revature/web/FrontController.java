@@ -14,14 +14,15 @@ import javax.servlet.http.HttpSession;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.revature.authorization.AuthService;
+import com.revature.controllers.AccountController;
 import com.revature.controllers.UserController;
 import com.revature.exceptions.AuthorizationException;
 import com.revature.exceptions.NotLoggedInException;
+import com.revature.models.Account;
 import com.revature.models.User;
 import com.revature.services.UserService;
 import com.revature.templates.LoginTemplate;
 import com.revature.templates.MessageTemplate;
-import com.revature.templates.UpdateUserTemplate;
 
 //Browse...d for Superclass on class creation (-> "extends HttpServlet")
 public class FrontController extends HttpServlet {
@@ -31,7 +32,7 @@ public class FrontController extends HttpServlet {
 	// Choose the 2nd option, "Add a generated serial version ID"
 	private static final long serialVersionUID = -4854248294011883310L;
 	private static final UserController userController = new UserController();
-	private static final AccountController accountController = new UserController();
+	private static final AccountController accountController = new AccountController();
 		// use to extract the JSON from the request body and put it into a new Object
 	  	// (ObjectMapper is from jackson.databind !!!)
 	private static final ObjectMapper om = new ObjectMapper();
@@ -69,9 +70,9 @@ public class FrontController extends HttpServlet {
 					// Delegate to a UserController method to handle obtaining ALL Users
 					// getSession() "false" parameter -> don't create a new session if not logged in
 					AuthService.guard(req.getSession(false), "Employee", "Admin");
-					List<User> all = userController.findAllUsers();
+					List<User> allUsers = userController.findAllUsers();
 					res.setStatus(200);
-					res.getWriter().println(om.writeValueAsString(all));
+					res.getWriter().println(om.writeValueAsString(allUsers));
 				}
 				break;
 			case "accounts":
@@ -93,18 +94,19 @@ public class FrontController extends HttpServlet {
 					///*** varargs parameter, int...id, and processing for these (add a loop in its
 					///*** catch handling), or ??? .
 						// getSession() "false" parameter -> don't create a new session if not logged in
+					int id = accountController.allUsersForAccount(accountId);
 					AuthService.guard(req.getSession(false), id, "Employee", "Admin");
-					Account acct = accountController.findAccountById(id);
+					Account acct = accountController.findAccountById(accountId);
 					res.setStatus(200);
-					res.getWriter().println(om.writeValueAsString(u));
+					res.getWriter().println(om.writeValueAsString(acct));
 				} else if(portions.length == 1) {
 					// Delegate to an AccountController method to handle obtaining ALL Accounts
 						// (NO complications in calling AuthService.guard here - finding ALL accts)
 					// getSession() "false" parameter -> don't create a new session if not logged in
 					AuthService.guard(req.getSession(false), "Employee", "Admin");
-					List<User> all = accountController.findAllAccounts();
+					List<User> allAccounts = accountController.findAllAccounts();
 					res.setStatus(200);
-					res.getWriter().println(om.writeValueAsString(all));
+					res.getWriter().println(om.writeValueAsString(allAccounts));
 				} else { // (portions.length should be == 3)
 					// Delegate to an AccountController method to handle obtaining an Account by the
 					// appropriate (requested) category of Id
@@ -121,6 +123,7 @@ public class FrontController extends HttpServlet {
 					case "owner":
 						// code to be written - delegate to accountController.allAccountsForUser
 					//[	break; ]
+					}
 				}
 				break;
 			}
@@ -281,10 +284,17 @@ public class FrontController extends HttpServlet {
 				if(portions.length == 1) {
 					// Delegate to a Controller method to handle updating a User
 					// getSession() "false" parameter -> don't create a new session if not logged in
+					// Delegate to a UserController method to handle obtaining a User by ID
+
+//*****					
+//*****				// HAVE TO GET User's accountId to pass to the AuthService.guard method below
+//*****				//int id = userController.allUsersForAccount(accountId);
+
 					AuthService.guard(req.getSession(false), id, "Admin");
 					User u = userController.updateUser(id);
+					
 					res.setStatus(200);
-					res.getWriter().println(om.writeValueAsString(u)); */
+					res.getWriter().println(om.writeValueAsString(u));
 					
 					
 					// get the User data contained in the request				

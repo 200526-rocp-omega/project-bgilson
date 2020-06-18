@@ -151,7 +151,7 @@ public class UserDAO implements IUserDAO {
 		try (Connection conn = ConnectionUtil.getConnection()) {
 			
 			// Step 2: Define SQL Statements
-			String sql = "SELECT * FROM USERS INNER JOIN ROLES ON USERS.role_id = ROLES.id where id = ?";
+			String sql = "SELECT * FROM USERS INNER JOIN ROLES ON USERS.role_id = ROLES.id where ROLES.id = ?";
 			
 			// Step 3[a]: Obtain the PreparedStatement object (on/from the Connection)
 				// Need a PreparedStatement here, since injecting a value (need a parameter/?)
@@ -160,7 +160,7 @@ public class UserDAO implements IUserDAO {
 			// Step 3b: Inject a value into the PreparedStatement parameter (replace the ? above)
 			stmt.setInt(1, userId);
 			
-			//System.out.println(sql); // use for testing, if needed
+			System.out.println(sql); // use for testing, if needed
 			
 			// Step 4a: Execute the Statement
 			ResultSet rs = stmt.executeQuery(); // returns a ResultSet object

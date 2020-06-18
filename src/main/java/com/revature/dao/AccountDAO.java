@@ -74,8 +74,9 @@ public class AccountDAO implements IAccountDAO {
 		try (Connection conn = ConnectionUtil.getConnection()) {
 			String status_join = "ACCOUNT_STATUS ON ACCOUNTS.status_id = ACCOUNT_STATUS.id";
 			String type_join = "ACCOUNT_TYPE ON ACCOUNTS.type_id = ACCOUNT_TYPE.id";
-			String sql = "SELECT * FROM ACCOUNTS INNER JOIN " + status_join + " " + type_join;
-			
+			String sql = "SELECT * FROM ACCOUNTS INNER JOIN " + status_join
+							+ " INNER JOIN " + type_join;
+						
 			// use Statement rather than PreparedStatement since no parameters are needed
 			Statement stmt = conn.createStatement();
 						
@@ -119,8 +120,8 @@ public class AccountDAO implements IAccountDAO {
 		try (Connection conn = ConnectionUtil.getConnection()) {
 			String status_join = "ACCOUNT_STATUS ON ACCOUNTS.status_id = ACCOUNT_STATUS.id";
 			String type_join = "ACCOUNT_TYPE ON ACCOUNTS.type_id = ACCOUNT_TYPE.id";
-			String sql = "SELECT * FROM ACCOUNTS INNER JOIN " + status_join + " " + type_join
-							+ " WHERE ACCOUNTS.id = ?";
+			String sql = "SELECT * FROM ACCOUNTS INNER JOIN " + status_join
+						 + " INNER JOIN " + type_join + " WHERE ACCOUNTS.id = ?";
 			
 			PreparedStatement stmt = conn.prepareStatement(sql);
 						
@@ -164,8 +165,8 @@ public class AccountDAO implements IAccountDAO {
 		try (Connection conn = ConnectionUtil.getConnection()) {
 			String status_join = "ACCOUNT_STATUS ON ACCOUNTS.status_id = ACCOUNT_STATUS.id";
 			String type_join = "ACCOUNT_TYPE ON ACCOUNTS.type_id = ACCOUNT_TYPE.id";
-			String sql = "SELECT * FROM ACCOUNTS INNER JOIN " + status_join + " " + type_join
-							+ " WHERE status_id = ?";
+			String sql = "SELECT * FROM ACCOUNTS INNER JOIN " + status_join
+							+ " INNER JOIN " + type_join + " WHERE status_id = ?";
 			
 			PreparedStatement stmt = conn.prepareStatement(sql);
 						
@@ -210,8 +211,8 @@ public class AccountDAO implements IAccountDAO {
 		try (Connection conn = ConnectionUtil.getConnection()) {
 			String status_join = "ACCOUNT_STATUS ON ACCOUNTS.status_id = ACCOUNT_STATUS.id";
 			String type_join = "ACCOUNT_TYPE ON ACCOUNTS.type_id = ACCOUNT_TYPE.id";
-			String sql = "SELECT * FROM ACCOUNTS INNER JOIN " + status_join + " " + type_join
-							+ " WHERE type_id = ?";
+			String sql = "SELECT * FROM ACCOUNTS INNER JOIN " + status_join
+							+ " INNER JOIN " + type_join + " WHERE type_id = ?";
 			
 			PreparedStatement stmt = conn.prepareStatement(sql);
 						
