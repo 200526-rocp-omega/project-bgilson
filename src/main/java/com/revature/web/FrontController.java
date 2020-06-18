@@ -31,6 +31,7 @@ public class FrontController extends HttpServlet {
 	// Choose the 2nd option, "Add a generated serial version ID"
 	private static final long serialVersionUID = -4854248294011883310L;
 	private static final UserController userController = new UserController();
+	private static final AccountController accountController = new UserController();
 		// use to extract the JSON from the request body and put it into a new Object
 	  	// (ObjectMapper is from jackson.databind !!!)
 	private static final ObjectMapper om = new ObjectMapper();
@@ -55,9 +56,9 @@ public class FrontController extends HttpServlet {
 			switch(portions[0]) { // diff endpoints, but else same (logic) as for doPost
 			case "users":
 				// check the length of (# of entries in) "portions" (specs:  only 2 endpoints 
-				// w/ "users":  /users and /users/:id  (1 and 2 portions, respectively))
-				if(portions.length == 2) { // orig. had > 1; then Bryan!
-					// Delegate to a Controller method to handle obtaining a User by ID
+				// w/ "users" for GET:  /users and /users/:id  (1 and 2 portions, respectively))
+				if(portions.length == 2) {
+					// Delegate to a UserController method to handle obtaining a User by ID
 					int id = Integer.parseInt(portions[1]);
 					// getSession() "false" parameter -> don't create a new session if not logged in
 					AuthService.guard(req.getSession(false), id, "Employee", "Admin");
@@ -65,7 +66,7 @@ public class FrontController extends HttpServlet {
 					res.setStatus(200);
 					res.getWriter().println(om.writeValueAsString(u));
 				} else {
-					// Delegate to a Controller method to handle obtaining ALL Users
+					// Delegate to a UserController method to handle obtaining ALL Users
 					// getSession() "false" parameter -> don't create a new session if not logged in
 					AuthService.guard(req.getSession(false), "Employee", "Admin");
 					List<User> all = userController.findAllUsers();
@@ -74,7 +75,53 @@ public class FrontController extends HttpServlet {
 				}
 				break;
 			case "accounts":
-				// MUST FLESH OUT
+				// check the length of (# of entries in) "portions"
+				// (specs:  there are *5* endpoints w/ "accounts" for GET:
+				// 		1 portion:   /accounts
+				//      2 portions:  /accounts/:id
+				//      3 portions:  /accounts/status/:statusId,
+				//					 /accounts/type/:typeId,	[B.Gilson - enhancement (not in specs)]
+				//				 and /accounts/owner/:userId
+				if(portions.length == 2) {
+					// Delegate to an AccountController method to handle obtaining an Account by accountId
+					int accountId = Integer.parseInt(portions[1]);
+					///*** NOTE:  For AuthService.guard, have to get appropriate USER id(s) to pass to it;
+					///*** thus, have to create an allUsersForAccount (in addition to the existing
+					///*** allAccountsForUser) in the I/UserAccountDAO, *and* in the appropriate
+					///*** Controller method(s - for each direction/way.  THEN either have to
+					///*** *modify* AuthService's 3-parameter guard method to handle an *additional*
+					///*** varargs parameter, int...id, and processing for these (add a loop in its
+					///*** catch handling), or ??? .
+						// getSession() "false" parameter -> don't create a new session if not logged in
+					AuthService.guard(req.getSession(false), id, "Employee", "Admin");
+					Account acct = accountController.findAccountById(id);
+					res.setStatus(200);
+					res.getWriter().println(om.writeValueAsString(u));
+				} else if(portions.length == 1) {
+					// Delegate to an AccountController method to handle obtaining ALL Accounts
+						// (NO complications in calling AuthService.guard here - finding ALL accts)
+					// getSession() "false" parameter -> don't create a new session if not logged in
+					AuthService.guard(req.getSession(false), "Employee", "Admin");
+					List<User> all = accountController.findAllAccounts();
+					res.setStatus(200);
+					res.getWriter().println(om.writeValueAsString(all));
+				} else { // (portions.length should be == 3)
+					// Delegate to an AccountController method to handle obtaining an Account by the
+					// appropriate (requested) category of Id
+						//  3 portions:  /accounts/status/:statusId,
+						//				 /accounts/type/:typeId, [B.Gilson-enhancement(not in specs)]
+						//			 and /accounts/owner/:userId
+					switch(portions[1]) {
+					case "status":
+						// code to be written - delegate to accountController.findAccountsByStatus
+						break;
+					case "type":
+						// code to be written - delegate to accountController.findAccountsByType
+						break;
+					case "owner":
+						// code to be written - delegate to accountController.allAccountsForUser
+					//[	break; ]
+				}
 				break;
 			}
 		} catch(AuthorizationException e) {
@@ -232,9 +279,7 @@ public class FrontController extends HttpServlet {
 				// check the length of (# of entries in) "portions"
 				// (*specs* just say "/users")
 				if(portions.length == 1) {
-/*					// Delegate to a Controller method to handle updating a User
-					//int id = Integer.parseInt(portions[1]);
-					int id = 
+					// Delegate to a Controller method to handle updating a User
 					// getSession() "false" parameter -> don't create a new session if not logged in
 					AuthService.guard(req.getSession(false), id, "Admin");
 					User u = userController.updateUser(id);
@@ -265,11 +310,12 @@ public class FrontController extends HttpServlet {
 					//om.readValue(String content, Class <T> valueType)
 						// the ".class" syntax means that at runtime,
 						// Jackson data-bind analyzes all of the specified
-						// class' variables, and makes sure that [the input (JSON) ?!?] matches them
-					UpdateUserTemplate uut = om.readValue(body, UpdateUserTemplate.class);
+						// class' variables, and makes sure that [the input
+						// (JSON), here] matches them
+					User u = om.readValue(body, User.class);
 					
 					// use to verify input initially, if needed
-					System.out.println(uut); // prints lt to STS Console
+					System.out.println(u); // prints lt to STS Console
 							// WHEN send a request in Postman with the JSON to /login ,
 							// output is (per toString() method in UpdateUserTemplate.java)
 					
